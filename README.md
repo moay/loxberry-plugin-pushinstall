@@ -18,4 +18,18 @@ In order to push your current dev status to your LoxBerry, go to your plugin dev
 ./vendor/bin/pushinstall
 ```
 
-Have fun. Tested on Mac, should run on Linux. Won't run on Windows.
+### Speeding up the process
+
+By default, you will have to enter your ssh password on every publish. This can be bypassed by using
+ssh keys as authentication mechanism. In order to create an ssh key and enable its use as password
+replacement during plugin publication via ssh, run
+
+```
+./vendor/bin/pushinstall-enable-ssh-key
+```
+
+Have fun. 
+
+### System requirements
+
+Tested on Mac, should run on Linux. Won't run on Windows.

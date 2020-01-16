@@ -10,5 +10,5 @@
         }
     ],
     "require": {},
-    "bin": ["bin/pushinstall"]
+    "bin": ["bin/pushinstall", "bin/pushinstall-enable-ssh-key"]
 }

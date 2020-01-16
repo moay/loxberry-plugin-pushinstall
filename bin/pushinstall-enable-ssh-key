@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+###########
+# Checking if is run from a plugin root directory
+###########
+
+#if [ ! -f ./plugin.cfg ]; then
+#    echo Please run this command from your plugin root folder. Go there and call "./vendor/bin/pushinstall"
+#    exit 1
+#fi
+
+
+###########
+# Some preparations
+###########
+
+echo Let\'s add your local ssh key on your LoxBerry.
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SCRIPTDIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+
+source $SCRIPTDIR/loxberry-connection-details
+
+
+###########
+# Prepare ssh certificate
+###########
+
+if [ ! -f ~/.ssh/loxberry-pushinstall ]; then
+  echo Generating new certificate. Choose a passphrase when asked, can also be left empty.
+  ssh-keygen -f ~/.ssh/loxberry-pushinstall -t rsa -b 4096
+fi
+
+
+###########
+# Copy and install ssh certificate
+###########
+
+echo Copying certificate to loxberry
+ssh-copy-id -i ~/.ssh/loxberry-pushinstall $LOXBERRY_USERNAME@$LOXBERRY_IP
+
+echo Adding certificate to local ssh configuration
+cat <<EOT >> ~/.ssh/config
+
+
+Host $LOXBERRY_IP
+    User $LOXBERRY_USERNAME
+    IdentityFile ~/.ssh/loxberry-pushinstall
+EOT
+
+echo
+echo Done. \\o/
+echo Try to login using ssh, you should be ready to go without any password request.
