@@ -1,4 +1,6 @@
-echo Make sure you have your ssh password at hand!
+if [ ! -f ~/.ssh/loxberry-pushinstall ] ; then
+    echo Make sure you have your ssh password at hand!
+fi
 
 PUSHINSTALL_CONFIG="$HOME/.loxberry-pushinstall"
 LOXBERRY_IP=""
