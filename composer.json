@@ -1,0 +1,14 @@
+{
+    "name": "moay/loxberry-plugin-pushinstall",
+    "description": "Provides a quick way to push and install a loxberry plugin via ssh",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "moay",
+            "email": "mv@moay.de"
+        }
+    ],
+    "require": {},
+    "bin": ["bin/pushinstall"]
+}

@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+###########
+# Checking if is run from a plugin root directory
+###########
+
+if [ ! -f ./plugin.cfg ]; then
+    echo Please run this command from your plugin root folder. Go there and call "./vendor/bin/pushinstall"
+    exit 1
+fi
+
+
+###########
+# Some preparations
+###########
+
+
+echo Let\'s install your plugin on your local LoxBerry.
+echo Make sure you have your ssh password at hand!
+
+PUSHINSTALL_CONFIG="$HOME/.loxberry-pushinstall"
+LOXBERRY_IP=""
+LOXBERRY_USERNAME="loxberry"
+LOXBERRY_SPIN=""
+
+mkdir -p $PUSHINSTALL_CONFIG
+
+if [ -e "$PUSHINSTALL_CONFIG/loxberry_ip" ] ; then
+    LOXBERRY_IP=$(cat "$PUSHINSTALL_CONFIG/loxberry_ip")
+fi
+if [ -e "$PUSHINSTALL_CONFIG/loxberry_username" ] ; then
+    LOXBERRY_USERNAME=$(cat "$PUSHINSTALL_CONFIG/loxberry_username")
+fi
+
+IP_QUESTION="Your LoxBerry IP"
+if [ "$LOXBERRY_IP" != "" ] ; then
+    IP_QUESTION="Your LoxBerry IP [$LOXBERRY_IP]"
+fi
+read -p "$IP_QUESTION: " ip_input
+LOXBERRY_IP=${ip_input:-$LOXBERRY_IP}
+echo "$LOXBERRY_IP" > $PUSHINSTALL_CONFIG/loxberry_ip
+
+USERNAME_QUESTION="Your LoxBerry username"
+if [ "$LOXBERRY_USERNAME" != "" ] ; then
+    USERNAME_QUESTION="Your LoxBerry IP [$LOXBERRY_USERNAME]"
+fi
+read -p "$USERNAME_QUESTION: " username_input
+LOXBERRY_USERNAME=${username_input:-$LOXBERRY_USERNAME}
+echo "$LOXBERRY_USERNAME" > $PUSHINSTALL_CONFIG/loxberry_username
+
+SPIN_QUESTION="Your LoxBerry SecurePin"
+read -p "$SPIN_QUESTION: " username_spin
+
+
+###########
+# Packaging and upload of the plugin
+###########
+
+echo Zipping current plugin
+zip -qr pushinstall_release.zip . -x "./vendor/*" "./.*"
+
+echo Uploading release
+scp pushinstall_release.zip $LOXBERRY_USERNAME@$LOXBERRY_IP:~
+rm pushinstall_release.zip
+
+
+###########
+# Setup via ssha
+###########
+
+ssh -tt $LOXBERRY_USERNAME@$LOXBERRY_IP << EOF
+   rm -rf pushinstall_release
+   unzip -q pushinstall_release.zip -d pushinstall_release
+   rm pushinstall_release.zip
+   cd pushinstall_release
+   sudo /opt/loxberry/sbin/plugininstall.pl action=install folder=. pin=$username_spin
+   cd ..
+   rm -rf pushinstall_release
+   exit
+EOF
+
+echo
+echo Done. \\o/
