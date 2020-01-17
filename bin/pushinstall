@@ -28,10 +28,10 @@ eval set -- "${FLAGS_ARGV}"
 # Checking if is run from a plugin root directory
 ###########
 
-if [ ! -f ./plugin.cfg ]; then
-    echo Please run this command from your plugin root folder. Go there and call "./vendor/bin/pushinstall"
-    exit 1
-fi
+#if [ ! -f ./plugin.cfg ]; then
+#    echo Please run this command from your plugin root folder. Go there and call "./vendor/bin/pushinstall"
+#    exit 1
+#fi
 
 
 ###########

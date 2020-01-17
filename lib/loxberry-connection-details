@@ -38,3 +38,10 @@ if [[ ${FLAGS_skip_connection} -eq ${FLAGS_FALSE} || "$LOXBERRY_USERNAME" == "" 
   LOXBERRY_USERNAME=${username_input:-$LOXBERRY_USERNAME}
   echo "$LOXBERRY_USERNAME" > $PUSHINSTALL_CONFIG/loxberry_username
 fi
+
+echo Looking for miniserver
+while ! ping -c1 $LOXBERRY_IP -p 22 &>/dev/null
+  do echo Miniserver could not be found. Please verify the ip and make sure that ssh is enabled and running on port 22.
+  exit 1
+done
+echo Miniserver found
