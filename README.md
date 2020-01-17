@@ -36,7 +36,7 @@ the connection configuration. Usage could look like this:
 
 Flags:
 
-* `-s` will skip the connection questions if set
+* `-s` will skip the connection questions if the IP and username of your LoxBerry have been entered at least once
 * `-p [securepin]` will set the SecurePin
 * `-c` will remove previously stored connection details
 
@@ -51,8 +51,8 @@ replacement during plugin publication via ssh, run
 ./vendor/bin/pushinstall-enable-ssh-key
 ```
 
-This will create a new ssh key for plugin installation (if not exists), add it as IdentityFile to the local ssh configuration (only for 
-the specified loxberry) and pass the key to your loxberry via ssh.
+This will create a new ssh key for plugin installation (if it doesn't exist yet), add it as IdentityFile to the local ssh configuration (only for 
+the specified LoxBerry) and pass the key to your LoxBerry via ssh.
 
 ## System requirements
 
