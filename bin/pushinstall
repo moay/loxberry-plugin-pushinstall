@@ -1,5 +1,29 @@
 #!/usr/bin/env bash
 
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SCRIPTDIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+
+source $SCRIPTDIR/../lib/shflags
+
+###########
+# Parsing parameters
+###########
+
+# parameter definition
+DEFINE_boolean 'skip_connection' false 'skips asking for your connection details if you have already entered them and they could be stored' 's'
+DEFINE_string 'secure_pin' '' 'The secure pin which will be entered for plugin installation. You will be asked for the pin if ommited' 'p'
+DEFINE_boolean 'clear_stored_connection' false 'Clears the stored connection details' 'c'
+
+# parse the command-line parameters
+FLAGS "$@" || exit $?
+eval set -- "${FLAGS_ARGV}"
+
+
 ###########
 # Checking if is run from a plugin root directory
 ###########
@@ -16,18 +40,15 @@ fi
 
 echo Let\'s install your plugin on your local LoxBerry.
 
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-done
-SCRIPTDIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+source $SCRIPTDIR/../lib/loxberry-connection-details
 
-source $SCRIPTDIR/loxberry-connection-details
-
-SPIN_QUESTION="Your LoxBerry SecurePin"
-read -p "$SPIN_QUESTION: " username_spin
+if [[ "${FLAGS_secure_pin}" == "" ]] ; then
+  SPIN_QUESTION="Your LoxBerry SecurePin"
+  read -p "$SPIN_QUESTION: " username_spin
+else
+  username_spin="${FLAGS_secure_pin}"
+  echo "pin: $username_spin"
+fi
 
 
 ###########
@@ -43,7 +64,7 @@ rm pushinstall_release.zip
 
 
 ###########
-# Setup via ssha
+# Plugin installation via ssh
 ###########
 
 ssh -tt $LOXBERRY_USERNAME@$LOXBERRY_IP << EOF
@@ -51,7 +72,7 @@ ssh -tt $LOXBERRY_USERNAME@$LOXBERRY_IP << EOF
    unzip -q pushinstall_release.zip -d pushinstall_release
    rm pushinstall_release.zip
    cd pushinstall_release
-   sudo /opt/loxberry/sbin/plugininstall.pl action=install folder=. pin=$username_spin
+   sudo /opt/loxberry/sbin/plugininstall.pl action=install folder=. pin=${username_spin}
    cd ..
    rm -rf pushinstall_release
    exit

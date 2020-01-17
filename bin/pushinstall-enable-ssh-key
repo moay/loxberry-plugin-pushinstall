@@ -1,12 +1,5 @@
 #!/usr/bin/env bash
 
-
-###########
-# Some preparations
-###########
-
-echo Let\'s add your local ssh key on your LoxBerry.
-
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
@@ -15,7 +8,28 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 SCRIPTDIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
-source $SCRIPTDIR/loxberry-connection-details
+source $SCRIPTDIR/../lib/shflags
+
+###########
+# Parsing parameters
+###########
+
+# parameter definition
+DEFINE_boolean 'skip_connection' false 'skips asking for your connection details if you have already entered them and they could be stored' 's'
+DEFINE_boolean 'clear_stored_connection' false 'clears the stored connection details' 'c'
+
+# parse the command-line parameters
+FLAGS "$@" || exit $?
+eval set -- "${FLAGS_ARGV}"
+
+
+###########
+# Some preparations
+###########
+
+echo Let\'s add your local ssh key on your LoxBerry.
+
+source $SCRIPTDIR/../lib/loxberry-connection-details
 
 
 ###########
@@ -23,10 +37,14 @@ source $SCRIPTDIR/loxberry-connection-details
 ###########
 
 if [ ! -f ~/.ssh/loxberry-pushinstall ]; then
-  echo Generating new certificate. Choose a passphrase when asked, can also be left empty.
+  echo Generating new certificate.
   ssh-keygen -f ~/.ssh/loxberry-pushinstall -t rsa -b 4096
 fi
 
+if [ ! -f ~/.ssh/loxberry-pushinstall ]; then
+  echo Something went wrong. There is no certificate file in ~/.ssh/loxberry-pushinstall. Try to create one yourself and run the command yourself.
+  exit 1
+fi
 
 ###########
 # Copy and install ssh certificate
