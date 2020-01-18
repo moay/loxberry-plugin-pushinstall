@@ -56,7 +56,7 @@ fi
 ###########
 
 echo Zipping current plugin
-zip -qr pushinstall_release.zip . -x "./vendor/*" "./.*"
+zip -qr pushinstall_release.zip . -x "./vendor/*" "./.*" "./storage/*" "./.*/*"
 
 echo Uploading release
 scp pushinstall_release.zip $LOXBERRY_USERNAME@$LOXBERRY_IP:~
